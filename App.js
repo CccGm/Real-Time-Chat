@@ -44,7 +44,6 @@ function MyStack() {
           <>
             <Stack.Screen
               name="Home"
-              component={HomeScreen}
               options={{
                 title: 'Chat Message',
                 headerRight: () => (
@@ -56,13 +55,14 @@ function MyStack() {
                     onPress={() => auth().signOut()}
                   />
                 ),
-              }}
-            />
-            {/* <Stack.Screen
-              name="SignUp"
-              component={SignUpScreen}
-              options={{headerShown: false}}
-            /> */}
+              }}>
+              {props => <HomeScreen {...props} user={user} />}
+            </Stack.Screen>
+            <Stack.Screen
+              name="Chat"
+              options={({route}) => ({title: route.params.name})}>
+              {props => <ChatScreen {...props} user={user} />}
+            </Stack.Screen>
           </>
         ) : (
           <>
