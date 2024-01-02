@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {SafeAreaView, StatusBar} from 'react-native';
+import {SafeAreaView, StatusBar, Text, View} from 'react-native';
 import ChatScreen from './src/screens/ChatScreen';
 import SignUpScreen from './src/screens/SignUpScreen';
 import {DefaultTheme, Provider as PaperProvider} from 'react-native-paper';
@@ -8,7 +8,8 @@ import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import HomeScreen from './src/screens/HomeScreen';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import fireStore from '@react-native-firebase/firestore';
+import ProfileScreen from './src/screens/ProfileScreen';
 
 const theme = {
   ...DefaultTheme,
@@ -25,8 +26,12 @@ function MyStack() {
   const [user, setUser] = useState('');
   useEffect(() => {
     const unRegister = auth().onAuthStateChanged(userExist => {
-      if (userExist) setUser(userExist);
-      else setUser('');
+      if (userExist) {
+        setUser(userExist);
+        fireStore().collection('users').doc(userExist.uid).update({
+          status: 'online',
+        });
+      } else setUser('');
     });
 
     return () => {
@@ -46,22 +51,28 @@ function MyStack() {
               name="Home"
               options={{
                 title: 'Chat Message',
-                headerRight: () => (
-                  <MaterialIcons
-                    name="account-circle"
-                    size={34}
-                    color={'green'}
-                    style={{marginRight: 20}}
-                    onPress={() => auth().signOut()}
-                  />
-                ),
+                headerTitleAlign: 'center',
               }}>
               {props => <HomeScreen {...props} user={user} />}
             </Stack.Screen>
             <Stack.Screen
               name="Chat"
-              options={({route}) => ({title: route.params.name})}>
+              options={({route}) => ({
+                title: (
+                  <View>
+                    <Text style={{fontSize: 18, color: 'green'}}>
+                      {route.params.name}
+                    </Text>
+                    <Text style={{fontSize: 12, color: 'black'}}>
+                      {route.params.status}
+                    </Text>
+                  </View>
+                ),
+              })}>
               {props => <ChatScreen {...props} user={user} />}
+            </Stack.Screen>
+            <Stack.Screen name="Profile">
+              {props => <ProfileScreen {...props} user={user} />}
             </Stack.Screen>
           </>
         ) : (

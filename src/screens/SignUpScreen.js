@@ -75,6 +75,7 @@ const SignUpScreen = () => {
         email: result.user.email,
         uid: result.user.uid,
         pic: image,
+        status: 'online',
       });
       setLoading(false);
     } catch (error) {
